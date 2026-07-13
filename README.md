@@ -18,6 +18,7 @@ fintech-churn-service/
 │   └── schemas.py        # Strict Pydantic v2 entry/exit data validation contracts
 ├── notebooks/            # Research & Model Compilation Layer
 │   ├── fintech_transactions.csv  # Authentic COFINFAD customer_data.csv matrix
+│   ├── exploration_and_tuning.ipynb  # Multi-model evaluation workbench & visualization canvas    
 │   └── train.py          # Standalone training, median balancing, and export suite
 ├── utils/                # Integration Verification Layer
 │   └── batch_test.py     # Automated sub-15ms loopback regression stress tests
