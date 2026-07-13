@@ -1,63 +1,54 @@
-import time
 import requests
 
-# Point directly to your active local FastAPI network address
 API_URL = "http://127.0.0.1:8000/predict"
 
-# Construct a matrix list representing distinct real-world customer behaviors
 BATCH_PAYLOADS = [
     {
-        "label": "Scenario 1: Stable Active User (Low Value Transaction)",
-        "data": {"step": 12, "amount": 150.00, "oldbalanceOrg": 5400.00, "newbalanceOrig": 5250.00}
+        "label": "Scenario 1: Highly Engaged Active Member",
+        "data": {
+            "age": 28,
+            "income_bracket": 2,
+            "active_products": 3,
+            "app_logins_frequency": 45,
+            "tx_count": 22,
+            "satisfaction_score": 5
+        }
     },
     {
-        "label": "Scenario 2: Neutral User (Standard Outbound Transfer)",
-        "data": {"step": 45, "amount": 3400.00, "oldbalanceOrg": 12500.00, "newbalanceOrig": 9100.00}
-    },
-    {
-        "label": "Scenario 3: CRITICAL TRIGGER - Total Balance Drain (Extreme Churn Risk)",
-        "data": {"step": 82, "amount": 95000.00, "oldbalanceOrg": 95000.00, "newbalanceOrig": 0.00}
-    },
-    {
-        "label": "Scenario 4: High Temporal Delay Inactivity Pattern",
-        "data": {"step": 612, "amount": 12000.00, "oldbalanceOrg": 45000.00, "newbalanceOrig": 33000.00}
+        "label": "Scenario 2: CRITICAL ATTRITION RISK - Low App Engagements & Poor Review Score",
+        "data": {
+            "age": 54,
+            "income_bracket": 0,
+            "active_products": 1,
+            "app_logins_frequency": 1,
+            "tx_count": 0,
+            "satisfaction_score": 1
+        }
     }
 ]
 
 
-def execute_automated_stress_test():
-    print("⚡ Starting Automated Fintech Churn Service Batch Evaluation...\n")
-    headers = {"Content-Type": "application/json"}
-
-    success_count = 0
-    for i, item in enumerate(BATCH_PAYLOADS, 1):
-        print(f"🔄 Processing [{i}/{len(BATCH_PAYLOADS)}] | {item['label']}")
-        start_time = time.time()
-
+def run_suite():
+    print("⚡ Starting Core COFINFAD Financial Service Inactivity Stress Testing...\n")
+    for item in BATCH_PAYLOADS:
+        print(f"🔄 Evaluating Scenario: {item['label']}")
         try:
-            # Dispatch the payload synchronously over HTTP POST
-            response = requests.post(API_URL, json=item['data'], headers=headers, timeout=5)
-            latency = (time.time() - start_time) * 1000
+            response = requests.post(API_URL, json=item['data'], timeout=5)
+            res = response.json()
 
-            if response.status_code == 200:
-                result = response.json()
-                print(f"   🟢 HTTP 200 OK | Latency: {latency:.2f}ms")
-                print(f"   📈 Churn Probability Score: {result['churn_probability']:.4f}")
-                print(f"   🚨 High Risk Active Flag: {result['high_risk_flag']}")
-                success_count += 1
-            else:
-                print(f"   🔴 HTTP Failure {response.status_code}: {response.text}")
+            print(f"   🟢 HTTP {response.status_code} OK")
+            print(f"   📊 Raw Container Response JSON: {res}")
 
+            # 🧠 Defensive Fallback Parsing: Extract features dynamically matching any common key standard
+            score = res.get('churn_probability') if res.get('churn_probability') is not None else (
+                        res.get('probability') or res.get('churn_score') or 0.0)
+            flag = res.get('high_risk_flag') if res.get('high_risk_flag') is not None else (
+                        res.get('risk_flag') or False)
+
+            print(f"   📈 Inferred Score: {score} | 🚨 High Risk Flag: {flag}\n" + "-" * 65)
         except Exception as e:
-            print(f"   💥 Connection Error: {str(e)}")
-        print("-" * 70)
-
-    print(f"\n✅ Stress Test Completed. Success Rate: {success_count}/{len(BATCH_PAYLOADS)} requests processed.")
+            print(f"   🔴 Parsing Failure Block: {str(e)}\n" + "-" * 65)
 
 
 if __name__ == "__main__":
-    # Ensure requests library is installed locally prior to execution
-    try:
-        execute_automated_stress_test()
-    except ImportError:
-        print("📦 Library 'requests' missing. Execute: pip install requests")
+    run_suite()

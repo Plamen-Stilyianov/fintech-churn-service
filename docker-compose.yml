@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  fintech-churn-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fintech-churn-app
+    ports:
+      - "8000:8000"
+    restart: always
+    environment:
+      - ENV=production
+      - LOG_LEVEL=info

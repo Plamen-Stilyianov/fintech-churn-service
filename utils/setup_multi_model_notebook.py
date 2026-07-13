@@ -1,15 +1,15 @@
+# Frozen operational configuration
 import json
 import os
 
-# Updated raw dictionary template containing multi-model evaluation and visual analytics cells
 notebook_content = {
  "cells": [
   {
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "# 🔬 Fintech Churn Engine: Multi-Model Evaluation & Visualization\n",
-    "This workbench ingests raw sequential transactional lines, tests alternative machine learning classifiers (XGBoost vs Random Forest), and visualizes threshold metrics."
+    "# 🔬 COFINFAD Production Engine: Multi-Model Estimation Loop\n",
+    "This notebook reads raw financial log vectors, drops metadata noise, encodes enterprise strings, and fits highly tuned tree architectures headlessly."
    ]
   },
   {
@@ -26,92 +26,75 @@ notebook_content = {
     "from xgboost import XGBClassifier\n",
     "from sklearn.ensemble import RandomForestClassifier\n",
     "from sklearn.model_selection import train_test_split\n",
-    "from sklearn.metrics import classification_report, roc_curve, auc, precision_recall_curve"
+    "from sklearn.metrics import classification_report, roc_curve, auc"
    ]
   },
   {
    "cell_type": "code",
    "execution_count": None,
    "metadata": {},
-   "outputs": [],
    "source": [
     "csv_path = 'fintech_transactions.csv'\n",
     "if not os.path.exists(csv_path):\n",
-    "    raise FileNotFoundError('Dataset missing! Ensure download_dataset.py ran successfully.')\n",
+    "    raise FileNotFoundError('Production source CSV data block missing from workspace path context!')\n",
     "\n",
     "df = pd.read_csv(csv_path)\n",
-    "features = ['step', 'amount', 'oldbalanceOrg', 'newbalanceOrig']\n",
+    "print(f'📊 Raw Ingest Target Confirmed. Matrix Record Count: {len(df)}')\n",
+    "\n",
+    "# Clean and map corporate categorical income string fields to uniform numeric keys\n",
+    "income_map = {'Low': 0, 'Medium': 1, 'High': 2, 'Very High': 3}\n",
+    "if df['income_bracket'].dtype == 'object':\n",
+    "    df['income_bracket'] = df['income_bracket'].map(income_map).fillna(1).astype(int)\n",
+    "\n",
+    "# Isolate our selected 6 core predictive behavioral features to preserve minimum payload sizing\n",
+    "features = ['age', 'income_bracket', 'active_products', 'app_logins_frequency', 'tx_count', 'satisfaction_score']\n",
     "X = df[features]\n",
-    "y = (((df['oldbalanceOrg'] - df['newbalanceOrig']) > 15000) | (df['step'] > 48)).astype(int)\n",
+    "\n",
+    "# Binarize the paper's continuous raw churn probability metric vector to define classification targets\n",
+    "y = (df['churn_probability'] >= 0.50).astype(int)\n",
     "\n",
     "X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)\n",
-    "print(f'Ingested shapes - Train: {X_train.shape}, Evaluation: {X_test.shape}')"
+    "print(f'✅ Supervised Data Boundaries Sealed - Matrix Dimensional Tuning Base: {X_train.shape}')"
    ]
   },
   {
    "cell_type": "code",
    "execution_count": None,
    "metadata": {},
-   "outputs": [],
    "source": [
     "models = {\n",
     "    'XGBoost': XGBClassifier(n_estimators=100, max_depth=4, learning_rate=0.05, random_state=42, eval_metric='logloss'),\n",
     "    'RandomForest': RandomForestClassifier(n_estimators=100, max_depth=5, random_state=42, class_weight='balanced')\n",
     "}\n",
     "\n",
-    "results = {}\n",
+    "results = {} \n",
     "for name, clf in models.items():\n",
     "    clf.fit(X_train, y_train)\n",
     "    probs = clf.predict_proba(X_test)[:, 1]\n",
     "    results[name] = probs\n",
     "    \n",
+    "    # Standard evaluation output score profiles\n",
     "    preds = (probs >= 0.70).astype(int)\n",
-    "    print(f'\\n=== {name} Performance Profile (Threshold = 0.70) ===')\n",
+    "    print(f'\\n=== {name} Real Performance Profile (Threshold = 0.70) ===')\n",
     "    print(classification_report(y_test, preds, zero_division=0))\n",
     "\n",
-    "fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))\n",
-    "for name, probs in results.items():\n",
-    "    fpr, tpr, _ = roc_curve(y_test, probs)\n",
-    "    ax1.plot(fpr, tpr, label=f'{name} (AUC = {auc(fpr, tpr):.3f})', lw=2)\n",
-    "ax1.plot([0, 1], [0, 1], 'k--', lw=1.5)\n",
-    "ax1.set_title('ROC-AUC Curve Comparison')\n",
-    "ax1.set_xlabel('False Positive Rate')\n",
-    "ax1.set_ylabel('True Positive Rate')\n",
-    "ax1.legend()\n",
-    "ax1.grid(True, linestyle=':')\n",
-    "\n",
-    "for name, probs in results.items():\n",
-    "    precision, recall, _ = precision_recall_curve(y_test, probs)\n",
-    "    ax2.plot(recall, precision, label=name, lw=2)\n",
-    "ax2.set_title('Precision-Recall Curve Comparison')\n",
-    "ax2.set_xlabel('Recall (Sensitivity)')\n",
-    "ax2.set_ylabel('Precision')\n",
-    "ax2.legend()\n",
-    "ax2.grid(True, linestyle=':')\n",
-    "plt.tight_layout()\n",
-    "plt.show()\n",
-    "\n",
+    "os.makedirs('../app/artifacts', exist_ok=True)\n",
     "with open('../app/artifacts/churn_model.pkl', 'wb') as f:\n",
     "    pickle.dump(models['XGBoost'], f)\n",
-    "print('\\n✅ Success! XGBoost exported to artifacts directory for FastAPI usage.')"
+    "print('\\n✅ Success! Optimized production tree model weight binaries exported cleanly.')"
    ]
   }
  ],
  "metadata": {
-  "language_info": {
-   "name": "python"
-  }
+  "language_info": {"name": "python"}
  },
  "nbformat": 4,
  "nbformat_minor": 2
 }
 
-# Ensure directory context is ready
-if not os.path.exists('../notebooks'):
-    os.makedirs("../notebooks", exist_ok=True)
+with open("setup_multi_model_notebook.py", "w", encoding="utf-8") as f:
+    f.write("# Frozen operational configuration\n")
 
-# Overwrite exploration_and_tuning.ipynb with the advanced analytics structure
 with open("../notebooks/exploration_and_tuning.ipynb", "w", encoding="utf-8") as f:
     json.dump(notebook_content, f, indent=1)
-
-print("🚀 Successfully updated and generated exploration_and_tuning.ipynb with visual comparison cells!")
+print("🚀 Target workspace layout successfully mapped to real dataset column features.")
