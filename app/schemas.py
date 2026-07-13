@@ -1,9 +1,10 @@
 from pydantic import BaseModel, Field
 
 class ChurnPredictionInput(BaseModel):
-    days_since_last_login: int = Field(..., ge=0, description="Inactivity metric")
-    transaction_drop_percentage: float = Field(..., ge=0.0, le=1.0, description="Drop in volume over 30 days")
-    payment_failure_count: int = Field(..., ge=0, description="Count of failed transaction events")
+    step: int = Field(..., ge=0, description="Simulation temporal hour index")
+    amount: float = Field(..., ge=0.0, description="Absolute monetary transaction value")
+    oldbalanceOrg: float = Field(..., ge=0.0, description="Origin balance prior to execution")
+    newbalanceOrig: float = Field(..., ge=0.0, description="Origin balance after execution")
 
 class ChurnPredictionResponse(BaseModel):
     churn_probability: float

@@ -11,3 +11,5 @@ cython
 matplotlib
 plotly
 seaborn
+jupyter
+datasets
